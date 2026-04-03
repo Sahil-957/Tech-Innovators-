@@ -127,7 +127,6 @@ node waste-server/server.js
 
 ### ⏳ Hour 0 – 2: Ideation & Planning
 
-* Finalized problem statement
 * Designed system architecture
 * Decided tech stack
 
@@ -199,9 +198,9 @@ This system can:
 
 > Team Innovators 🚀
 
-* Member 1 – Hardware & Integration
-* Member 2 – Backend & Communication
-* Member 3 – Frontend & UI
+* Member 1&2 – Hardware & Integration
+* Member 3 – Backend & Communication
+* Member 4 – Frontend & UI
 
 ---
 
