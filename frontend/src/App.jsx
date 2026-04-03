@@ -11,6 +11,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import MapView from './components/MapView'
+import { LIVE_BIN_LOCATIONS } from './data/binLocations'
 
 const RECONNECT_DELAY = 3000
 const MAX_HISTORY = 12
@@ -328,6 +330,13 @@ export default function App() {
   const selectedBinLevel = selectedBin === 'bin1' ? bin1Level : bin2Level
   const selectedBinGas = selectedBin === 'bin1' ? bin1Gas : bin2Gas
   const selectedBinTheme = getLevelTheme(selectedBinLevel)
+  const liveMapBins = LIVE_BIN_LOCATIONS.map((bin) => ({
+    id: bin.id,
+    latitude: bin.latitude,
+    longitude: bin.longitude,
+    fillLevel: bin.key === 'bin1' ? bin1Level : bin2Level,
+    gasValue: bin.key === 'bin1' ? bin1Gas : bin2Gas,
+  }))
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#eff6ff,_#e2e8f0_55%,_#dbeafe)] px-4 py-8 text-slate-900">
@@ -456,6 +465,24 @@ export default function App() {
               </ResponsiveContainer>
             </div>
           </div>
+        </section>
+
+        <section className="mt-8 rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-xl shadow-slate-300/30 backdrop-blur">
+          <div className="mb-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
+              Collection Route Map
+            </p>
+            <h2 className="mt-2 text-2xl font-bold text-slate-900">
+              Live and simulated bin tracking
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm text-slate-600">
+              Monitor full bins across Pune and follow the highlighted pickup route for urgent collection.
+            </p>
+          </div>
+
+          <MapView
+            liveBins={liveMapBins}
+          />
         </section>
       </div>
     </div>
