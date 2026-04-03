@@ -7,6 +7,7 @@ import { COLLECTION_START_POINT, PUNE_CENTER, SIMULATED_BINS } from '../data/bin
 const ROUTING_SERVICE_URL = 'https://router.project-osrm.org/route/v1/driving'
 const MAX_ROUTE_STOPS = 5
 const MIN_FILL_FOR_ROUTE = 50
+const TRUCK_CAPACITY = 300
 
 function getMarkerColor(level) {
   if (level > 80) {
@@ -158,6 +159,31 @@ function getIntelligentRouteOrder(bins, startPoint) {
   return selectedBins
 }
 
+function getCapacityAwareBinSelection(bins) {
+  const sortedBins = [...bins]
+    .filter((bin) => bin.fillLevel >= MIN_FILL_FOR_ROUTE)
+    .sort((firstBin, secondBin) => secondBin.fillLevel - firstBin.fillLevel)
+
+  const selectedBins = []
+  let usedCapacity = 0
+
+  while (sortedBins.length > 0 && selectedBins.length < MAX_ROUTE_STOPS) {
+    const nextBinIndex = sortedBins.findIndex(
+      (bin) => usedCapacity + bin.fillLevel <= TRUCK_CAPACITY
+    )
+
+    if (nextBinIndex === -1) {
+      break
+    }
+
+    const [nextBin] = sortedBins.splice(nextBinIndex, 1)
+    selectedBins.push(nextBin)
+    usedCapacity += nextBin.fillLevel
+  }
+
+  return selectedBins
+}
+
 function HubSelector({ isPickingHub, onSelectHub }) {
   useMapEvents({
     click(event) {
@@ -198,7 +224,8 @@ export default function MapView({ liveBins = [], simulatedBins = SIMULATED_BINS,
     ...editableSimulatedBins.map((bin) => normalizeBin(bin, 'Simulated')),
   ]
 
-  const prioritizedBins = getIntelligentRouteOrder(bins, hubPoint)
+  const selectedBins = getCapacityAwareBinSelection(bins)
+  const prioritizedBins = getIntelligentRouteOrder(selectedBins, hubPoint)
 
   const routePositions = [
     [hubPoint.latitude, hubPoint.longitude],
