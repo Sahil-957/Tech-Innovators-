@@ -1,6 +1,6 @@
 # ♻️ Smart Waste Management System
 
-### Real-Time Bin Monitoring & Intelligent Waste Collection
+### Real-Time Bin Monitoring & Intelligent Waste Management
 
 ---
 
