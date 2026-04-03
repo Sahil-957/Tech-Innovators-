@@ -74,6 +74,34 @@ React Dashboard (Real-time UI)
 
 ---
 
+## Hosted Deployment Setup
+
+For a network-independent setup, deploy the Node WebSocket server on a VPS or public cloud and point the frontend to that hosted endpoint.
+
+Frontend configuration:
+
+1. Create `frontend/.env`
+2. Add:
+
+```env
+VITE_WS_URL=wss://your-domain.example/ws
+```
+
+Server configuration:
+
+* `PORT` defaults to `8080`
+* `HOST` defaults to `0.0.0.0`
+
+Example:
+
+```powershell
+$env:PORT=8080
+$env:HOST='0.0.0.0'
+node waste-server/server.js
+```
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Hardware

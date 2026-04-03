@@ -1,11 +1,14 @@
 const WebSocket = require("ws");
 
+const PORT = Number(process.env.PORT || 8080);
+const HOST = process.env.HOST || "0.0.0.0";
+
 const wss = new WebSocket.Server({
-  port: 8080,
-  host: "0.0.0.0",
+  port: PORT,
+  host: HOST,
 });
 
-console.log("WebSocket server running on ws://0.0.0.0:8080");
+console.log(`WebSocket server running on ws://${HOST}:${PORT}`);
 
 let latestData = {
   bin1: { level: 0, gas: 0 },

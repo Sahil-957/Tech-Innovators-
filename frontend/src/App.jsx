@@ -12,10 +12,26 @@ import {
   YAxis,
 } from 'recharts'
 
-const WS_URL = 'ws://10.126.235.132:8080'
 const RECONNECT_DELAY = 3000
 const MAX_HISTORY = 12
 const TOAST_DURATION = 4000
+
+function getWebSocketUrl() {
+  const envUrl = import.meta.env.VITE_WS_URL?.trim()
+
+  if (envUrl) {
+    return envUrl
+  }
+
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    return `${protocol}//${window.location.hostname}:8080`
+  }
+
+  return 'ws://localhost:8080'
+}
+
+const WS_URL = getWebSocketUrl()
 
 function getLevelTheme(level) {
   if (level >= 80) {
@@ -367,62 +383,9 @@ export default function App() {
           </div>
         </section>
 
-        <section className="mt-8 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="grid gap-6 md:grid-cols-2">
-            <BinCard title="Bin 1" level={bin1Level} gas={bin1Gas} onFocus={() => setSelectedBin('bin1')} />
-            <BinCard title="Bin 2" level={bin2Level} gas={bin2Gas} onFocus={() => setSelectedBin('bin2')} />
-          </div>
-
-          <div className="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-xl shadow-slate-300/30 backdrop-blur">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
-                  Focus Bin
-                </p>
-                <h2 className="mt-2 text-3xl font-bold text-slate-900">
-                  {selectedBin === 'bin1' ? 'Bin 1' : 'Bin 2'}
-                </h2>
-              </div>
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${selectedBinTheme.badge}`}>
-                {selectedBinTheme.label}
-              </span>
-            </div>
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => setSelectedBin('bin1')}
-                className={`rounded-2xl px-4 py-3 text-left transition ${
-                  selectedBin === 'bin1' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-700'
-                }`}
-              >
-                <p className="text-xs uppercase tracking-[0.2em]">Bin 1</p>
-                <p className="mt-2 text-2xl font-bold">{bin1Level}%</p>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSelectedBin('bin2')}
-                className={`rounded-2xl px-4 py-3 text-left transition ${
-                  selectedBin === 'bin2' ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-700'
-                }`}
-              >
-                <p className="text-xs uppercase tracking-[0.2em]">Bin 2</p>
-                <p className="mt-2 text-2xl font-bold">{bin2Level}%</p>
-              </button>
-            </div>
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-sm text-slate-500">Current Fill</p>
-                <p className="mt-2 text-3xl font-bold text-slate-900">{selectedBinLevel}%</p>
-              </div>
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-sm text-slate-500">Current Gas</p>
-                <p className="mt-2 text-3xl font-bold text-slate-900">{selectedBinGas}</p>
-              </div>
-            </div>
-          </div>
+        <section className="mt-8 grid gap-6 md:grid-cols-2">
+          <BinCard title="Bin 1" level={bin1Level} gas={bin1Gas} onFocus={() => setSelectedBin('bin1')} />
+          <BinCard title="Bin 2" level={bin2Level} gas={bin2Gas} onFocus={() => setSelectedBin('bin2')} />
         </section>
 
         <section className="mt-8 grid gap-6 lg:grid-cols-2">
