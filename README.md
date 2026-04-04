@@ -1,221 +1,203 @@
-# ♻️ Smart Waste Management System
+# Smart Waste Management System
 
-### Real-Time Bin Monitoring & Intelligent Waste Management
+Real-time bin monitoring, gas detection, live dashboard analytics, and intelligent collection routing for a hackathon-ready smart city waste workflow.
 
----
+## Overview
 
-## 🚀 Overview
+This project combines ESP32-based sensing, a Node.js WebSocket server, and a React dashboard to monitor waste bins in real time. It tracks fill levels and gas values, raises alerts for risky conditions, and visualizes collection planning on an interactive map centered on Pune.
 
-Urban waste management faces major challenges due to the lack of real-time monitoring. Traditional systems rely on fixed collection schedules, leading to inefficient operations, unnecessary fuel consumption, and unhygienic conditions caused by overflowing bins.
+The latest dashboard version includes:
 
-This project introduces a **real-time smart waste monitoring system** that enables efficient waste collection, improves hygiene, and reduces operational costs.
+- live bin monitoring for two real sensor bins
+- simulated bins for demo and route-planning scenarios
+- color-based bin status indicators
+- map-based route planning with road-following directions
+- intelligent bin selection before routing
+- movable collection hub selection on the map
 
----
+## System Block Diagram
 
-## 🧠 Problem Statement
+![System Block Diagram](./docs/system-block-diagram.png)
 
-Urban areas struggle with inefficient waste collection due to the absence of real-time monitoring of bin fill levels. Fixed collection schedules often result in unnecessary pickups of half-filled bins, while some bins overflow before being serviced, leading to unhygienic conditions, foul odors, and environmental concerns.
+## Problem Statement
 
-This inefficiency increases operational costs, fuel usage, and workload for municipal services, while reducing the overall cleanliness of the city.
+Traditional waste collection often follows fixed schedules rather than actual bin conditions. That leads to:
 
----
+- unnecessary trips to half-filled bins
+- overflowed bins before pickup
+- poor hygiene and odor issues
+- higher fuel and manpower costs
 
-## 💡 Our Solution
+This system solves that by making collection decisions data-driven and visible in real time.
 
-We propose a **Smart Waste Management System** that provides:
+## Solution
 
-* 📡 Real-time monitoring of bin fill levels
-* 🌫️ Gas detection for hazardous conditions
-* 📊 Live dashboard for visualization
-* 🔔 Alerts for overflow and unsafe gas levels
+The Smart Waste Management System provides:
 
----
+- real-time fill-level monitoring using ultrasonic sensors
+- hazardous gas monitoring using MQ4 sensors
+- WebSocket-based live updates from hardware to dashboard
+- dashboard alerts for warning and critical conditions
+- intelligent route planning for waste collection workers
 
-## ⚙️ System Architecture
+## Architecture
 
+### Hardware Layer
+
+- ESP32 controller
+- ultrasonic sensors for bin fill level
+- MQ4 gas sensors for gas detection
+- optional GSM module for SMS alerts
+
+### Communication Layer
+
+- Wi-Fi-enabled ESP32 communication
+- Node.js WebSocket server on port `8080`
+- real-time event streaming to the frontend
+
+### Dashboard Layer
+
+- React + Vite frontend
+- Recharts for analytics
+- React Leaflet + OpenStreetMap for mapping
+
+## Current Features
+
+### Real-Time Dashboard
+
+- live connection status
+- per-bin fill percentage and gas value cards
+- trend chart and comparison chart
+- toast alerts when bins cross warning and critical thresholds
+
+### Interactive Map
+
+- Pune-centered map using OpenStreetMap
+- live bins plus editable simulated bins
+- marker colors based on fill level:
+  - green: below 50%
+  - yellow: 50% to 80%
+  - red: above 80%
+- numbered route-stop markers for selected bins
+- changeable collection hub directly from the map
+
+### Intelligent Route Planning
+
+The routing pipeline now works in stages:
+
+1. Bins below `50%` are ignored for collection.
+2. Bins are filtered using a truck capacity constraint.
+3. The truck selects bins without exceeding total capacity.
+4. The route order is generated from the collection hub.
+5. Each next stop is chosen using both urgency and distance.
+6. The final route is drawn using road-following directions.
+
+### Capacity-Aware Selection
+
+- fixed truck capacity: `300` units
+- bins are sorted by higher fill level first
+- bins are added while total load stays within capacity
+- oversized bins are skipped temporarily so smaller bins can still fit
+- selected bins are then passed to route generation
+
+## Tech Stack
+
+### Hardware
+
+- ESP32
+- Ultrasonic sensor
+- MQ4 gas sensor
+- GSM module (optional)
+
+### Software
+
+- React
+- Vite
+- Recharts
+- React Leaflet
+- Leaflet
+- Node.js
+- WebSocket
+- Tailwind CSS
+
+## Project Structure
+
+```text
+.
+|-- frontend/          # React dashboard
+|-- waste-server/      # Node.js WebSocket server
+|-- server_client/     # Additional server/client work
+`-- docs/              # README assets and diagrams
 ```
-Sensors (Ultrasonic + MQ4 Gas)
-        ↓
-ESP32 (Data Processing)
-        ↓
-WebSocket Server (Node.js)
-        ↓
-React Dashboard (Real-time UI)
+
+## How To Run
+
+### 1. Start the WebSocket Server
+
+```powershell
+node waste-server/server.js
 ```
 
----
+By default the server runs on:
 
-## 🧩 Features
+- `HOST=0.0.0.0`
+- `PORT=8080`
 
-### 🔴 Real-Time Monitoring
+### 2. Start the Frontend
 
-* Continuous tracking of bin fill levels
-* Instant updates on dashboard
+```powershell
+cd frontend
+npm install
+npm run dev
+```
 
-### 🌫️ Gas Detection
+The app will open in Vite dev mode, usually on `http://localhost:5173`.
 
-* MQ4 sensor detects harmful gases
-* Adds safety layer beyond basic systems
+## Optional Hosted Setup
 
-### 📊 Live Dashboard
-
-* Displays bin status in real-time
-* Visual indicators (levels, alerts)
-
-### 🚨 Alert System
-
-* Bin full notifications
-* Gas detection warnings
-
-### ⚡ Efficient Communication
-
-* WebSocket-based real-time communication
-* No cloud dependency (fast + lightweight)
-
----
-
-## Hosted Deployment Setup
-
-For a network-independent setup, deploy the Node WebSocket server on a VPS or public cloud and point the frontend to that hosted endpoint.
-
-Frontend configuration:
-
-1. Create `frontend/.env`
-2. Add:
+If the frontend needs to connect to a hosted WebSocket server, create `frontend/.env` and set:
 
 ```env
 VITE_WS_URL=wss://your-domain.example/ws
 ```
 
-Server configuration:
+## Demo Flow
 
-* `PORT` defaults to `8080`
-* `HOST` defaults to `0.0.0.0`
+For demo or presentation mode:
 
-Example:
+- use the live bins for real sensor data
+- manually edit simulated bin fill values on the map panel
+- change the collection hub location if needed
+- show how the system re-selects bins based on truck capacity
+- show how the final route updates using road directions
 
-```powershell
-$env:PORT=8080
-$env:HOST='0.0.0.0'
-node waste-server/server.js
-```
+## Impact
 
----
+This project helps:
 
-## 🛠️ Tech Stack
+- reduce unnecessary collection trips
+- prevent overflow situations
+- improve cleanliness and safety
+- optimize truck utilization
+- support faster municipal decision-making
 
-### Hardware
+## Future Enhancements
 
-* ESP32
-* Ultrasonic Sensors (US-100)
-* MQ4 Gas Sensors
-* GSM Module (for alerts - optional/extension)
+- predictive fill forecasting
+- multi-truck allocation
+- admin authentication and reporting
+- cloud deployment and storage
+- mobile app for field workers
+- stronger SMS and remote command workflows
 
-### Software
+## Team
 
-* React.js (Frontend)
-* Node.js (WebSocket Server)
-* Tailwind CSS (UI Design)
+Team Innovators
 
----
+- Hardware and sensor integration
+- Backend and WebSocket communication
+- Frontend dashboard and route visualization
 
-## 📈 Progress Timeline (24-Hour Hackathon)
+## Note
 
-> 🕒 This section will be continuously updated during development
-
----
-
-### ⏳ Hour 0 – 2: Ideation & Planning
-
-* Designed system architecture
-* Decided tech stack
-
----
-
-### ⏳ Hour 2 – 5: Hardware Setup
-
-* Interfaced Ultrasonic Sensors with ESP32
-* Integrated MQ4 Gas Sensors
-* Verified sensor readings
-
----
-
-### ⏳ Hour 5 – 8: Backend + Communication
-
-* Set up WebSocket server
-* Established ESP32 → Server communication
-* Tested real-time data transmission
-
----
-
-### ⏳ Hour 8 – 12: Frontend Development (Initial)
-
-* Built basic React dashboard
-* Connected frontend to WebSocket
-* Displayed real-time bin data
-
----
-
-### ⏳ Hour 12 – 18: UI/UX Improvements (Ongoing)
-
-* Adding alert system
-* Improving dashboard visuals
-* Implementing color-based indicators
-
----
-
-### ⏳ Hour 18 – 24: Final Optimization (Planned)
-
-* System testing & debugging
-* UI polishing
-* Preparing demo & presentation
-
----
-
-## 🔄 Future Enhancements
-
-* 📍 Route optimization for waste collection
-* 📊 Predictive analytics (when bin will be full)
-* ☁️ Cloud integration for scalability
-* 📱 Mobile app version
-* 🔊 Smart alert system with sound
-
----
-
-## 🎯 Impact
-
-This system can:
-
-* Reduce unnecessary waste collection trips
-* Prevent bin overflow
-* Improve city hygiene
-* Optimize operational costs
-* Enable data-driven decision making
-
----
-
-## 👥 Team
-
-> Team Innovators 🚀
-
-* Member 1&2 – Hardware & Integration
-* Member 3 – Backend & Communication
-* Member 4 – Frontend & UI
-
----
-
-## 📌 Note
-
-This project is developed as part of a **24-hour hackathon**, and is being continuously improved in real-time.
-
----
-
-## 📬 Contributions & Updates
-
-We will keep updating this repository with:
-
-* Progress improvements
-* UI enhancements
-* Additional features
-
-Stay tuned! 🚀
+This project was built as a fast-moving hackathon system and has been iteratively improved with live dashboard upgrades, better route logic, and presentation-ready visualizations.
